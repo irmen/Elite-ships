@@ -67,11 +67,18 @@ class Object3d:
                 line = next(lines).strip().strip(";")
                 num_points = int(line)
                 coords = []
+                scaling = 1
                 for i in range(num_points):
                     point = next(lines).split(";")[:3]
-                    point = tuple(float(x) for x in point)
+                    point = tuple(float(x) * scaling for x in point)
                     coords.append(point)
                 self.coords = tuple(coords)
+                if scaling!=1:
+                    print("----- SCALED COORDS OF ", self.name)
+                    for point in self.coords:
+                        print(f" {point[0]}; {point[1]}; {point[2]};,")
+                    print("----- END SCALED\n")
+
                 self.rotated_coords = self.coords
                 next(lines)
                 line = next(lines).strip().strip(";")
