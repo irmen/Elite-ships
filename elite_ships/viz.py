@@ -4,24 +4,23 @@ from .obj import Object3d
 
 
 def viz():
-    objects = []
-    for filename in glob("elite-ships-src/vrml/*.wrl"):
-        print("loading", filename)
-        obj = Object3d()
-        obj.load_from_wrl(filename)
-        objects.append(obj)
-    app = App()
 
-    t = 0.0
-    active_object = 0
+    active_object = None
+    app = App()
 
     def next_object(e):
         nonlocal active_object
-        active_object += 1
+        active_object = Object3d()
+        active_object.load_from_wrl(next(objects))
+        app.shipname(active_object.name)
+
+    objects = iter(glob("elite-ships-src/vrml/*.wrl"))
+    next_object(None)
+    t = 0.0
 
     def animate():
         nonlocal t, active_object
-        robj = objects[active_object].rotated(t)
+        robj = active_object.rotated(t)
         app.draw_object(robj)
         app.bind("<Key>", next_object)
         t += 0.08
@@ -49,6 +48,10 @@ class App(tkinter.Tk):
 
     def clear(self):
         self.canvas.delete("line")
+
+    def shipname(self, name):
+        self.canvas.delete("shipname")
+        self.canvas.create_text(self.WIDTH//2, 50, text=name, font=("Courier", 24), tags="shipname")
 
     def project2d(self, x, y, z) -> tuple:
         z, y = y, z

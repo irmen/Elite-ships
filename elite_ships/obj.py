@@ -1,10 +1,12 @@
 from math import sin, cos
+import os
 from vrml.vrml97.parser import buildParser
 from vrml.vrml97.basenodes import IndexedFaceSet, IndexedLineSet
 
 
 class Object3d:
     def __init__(self):
+        self.name = ""
         self.faces = tuple()
         self.coords = tuple()
         self.lines = tuple()
@@ -19,6 +21,7 @@ class Object3d:
         scenegraph = result[1][1]
         if len(scenegraph.children) < 1:
             raise IOError("failed to load vrm file")
+        self.name = os.path.splitext(os.path.split(filename)[1])[0]
         for shape in scenegraph.children:
             mat = shape.appearance.material
             self.shininess = mat.shininess
@@ -96,7 +99,7 @@ class Object3d:
                 x*matrix[1][0] + y*matrix[1][1] + z*matrix[1][2],
                 x*matrix[2][0] + y*matrix[2][1] + z*matrix[2][2]
             ))
-        return rotated
+        return tuple(rotated)
 
 
 def main():
