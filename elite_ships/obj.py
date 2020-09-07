@@ -57,6 +57,36 @@ class Object3d:
                 self.linecoords = tuple(tuple(xyz) for xyz in geo.coord.point)
                 self.rotated_linecoords = self.linecoords
 
+    def load_directXmesh(self, filename):
+        # TODO the mesh coordinates need to be de-duped!
+        lines = iter(open(filename).readlines())
+        while True:
+            line = next(lines).strip()
+            if line.startswith("Mesh "):
+                _, self.name, _ = line.split(maxsplit=3)
+                line = next(lines).strip().strip(";")
+                num_points = int(line)
+                coords = []
+                for i in range(num_points):
+                    point = next(lines).split(";")[:3]
+                    point = tuple(float(x) for x in point)
+                    coords.append(point)
+                self.coords = tuple(coords)
+                self.rotated_coords = self.coords
+                next(lines)
+                line = next(lines).strip().strip(";")
+                num_faces = int(line)
+                faces = []
+                for i in range(num_faces):
+                    line = next(lines).split(";")
+                    num_points = int(line[0])
+                    points = tuple(int(x) for x in line[1].split(','))
+                    if len(points) != num_points:
+                        raise IOError("invalid number of points read")
+                    faces.append(tuple(reversed(points)))
+                self.faces = tuple(faces)
+                break
+
     def rotate(self, t: float) -> None:
         matrix = self._make_matrix(t)
         self.rotated_coords = self._rotate(self.coords, matrix)

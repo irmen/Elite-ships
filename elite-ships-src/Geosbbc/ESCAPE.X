@@ -18,7 +18,7 @@ Header {
  1;
 }
 
-Mesh escape {
+Mesh escapepod {
  4;
 -07.00; 00.00; 36.00;,
 -07.00;-14.00;-12.00;,

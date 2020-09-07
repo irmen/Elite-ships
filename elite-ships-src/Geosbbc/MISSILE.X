@@ -25,6 +25,9 @@ Header {
  1;
 }
 
+# todo coords are scaled too large
+
+
 Mesh missile {
  17;
  00.00; 00.00; 68.00;,

@@ -25,7 +25,7 @@ Header {
  1;
 }
 
-Mesh Station {
+Mesh CoriolisStation {
  52;
   160.00; 00.00; 160.00;,
   00.00; 160.00; 160.00;,

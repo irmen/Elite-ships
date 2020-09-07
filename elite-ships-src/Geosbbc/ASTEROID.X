@@ -13,6 +13,8 @@ Header {
  1;
 }
 
+# todo coords are scaled too small
+
 Mesh Asteroid {
  42;
    00.00; 10.00; 00.00;,

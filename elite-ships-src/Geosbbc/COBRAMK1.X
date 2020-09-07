@@ -25,6 +25,8 @@ Header {
  1;
 }
 
+# todo coords are scaled too small
+
 Mesh cobramk1 {
  17;
  -02.25;-00.13; 06.25;,

@@ -25,7 +25,9 @@ Header {
  1;
 }
 
-Mesh Ship {
+# todo coords are scaled too small
+
+Mesh ferdelance {
  19;
   00.00;-01.75; 13.50;,
  -05.00;-01.75;-00.50;,

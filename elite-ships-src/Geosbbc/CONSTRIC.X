@@ -25,7 +25,7 @@ Header {
  1;
 }
 
-Mesh constric {
+Mesh constrictor {
  17;
  20.00;-07.00; 80.00;,
 -20.00;-07.00; 80.00;,

@@ -11,10 +11,12 @@ def viz():
     def next_object(e):
         nonlocal active_object
         active_object = Object3d()
-        active_object.load_from_wrl(next(objects))
+        # active_object.load_from_wrl(next(objects))
+        active_object.load_directXmesh(next(objects))
         app.shipname(active_object.name)
 
-    objects = iter(glob("elite-ships-src/vrml/*.wrl"))
+    # objects = iter(glob("elite-ships-src/vrml/*.wrl"))
+    objects = iter(glob("elite-ships-src/Geosbbc/*.X"))
     next_object(None)
     t = 0.0
 

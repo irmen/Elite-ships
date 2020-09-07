@@ -25,7 +25,7 @@ Header {
  1;
 }
 
-Mesh sidewind {
+Mesh sidewinder {
  10;
 -32.00; 00.00; 36.00;,
  32.00; 00.00; 36.00;,

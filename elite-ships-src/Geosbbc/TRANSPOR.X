@@ -25,7 +25,7 @@ Header {
  1;
 }
 
-Mesh transpor {
+Mesh transporter {
  41;
  00.00; 10.00;-26.00;,
 -25.00; 04.00;-26.00;,

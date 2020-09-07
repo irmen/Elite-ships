@@ -156,7 +156,9 @@ Header {
  1;
 }
 
-Mesh Ship {
+# todo coords are scaled too small
+
+Mesh cobrafs {
 68;
   04.00; 00.00; 09.50;,
  -04.00; 00.00; 09.50;,
