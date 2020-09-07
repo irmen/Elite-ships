@@ -5,7 +5,7 @@ from .obj import Object3d
 
 def viz():
 
-    active_object = None
+    active_object = Object3d()
     app = App()
 
     def next_object(e):
@@ -20,8 +20,8 @@ def viz():
 
     def animate():
         nonlocal t, active_object
-        robj = active_object.rotated(t)
-        app.draw_object(robj)
+        active_object.rotate(t)
+        app.draw_object(active_object)
         app.bind("<Key>", next_object)
         t += 0.08
         app.after(1000//30, animate)
@@ -41,10 +41,10 @@ class App(tkinter.Tk):
         self.canvas.pack()
 
     def line(self, x1, y1, x2, y2):
-        self.canvas.create_line((x1,y1), (x2,y2), tags="line")
+        self.canvas.create_line((x1,y1), (x2,y2), tags="line", fill="navy", width=2)
 
     def poly(self, coords):
-        self.canvas.create_polygon(coords, tags="line", fill="", outline="black")
+        self.canvas.create_polygon(coords, tags="line", fill="", outline="black", width=2)
 
     def clear(self):
         self.canvas.delete("line")
@@ -53,20 +53,17 @@ class App(tkinter.Tk):
         self.canvas.delete("shipname")
         self.canvas.create_text(self.WIDTH//2, 50, text=name, font=("Courier", 24), tags="shipname")
 
-    def project2d(self, x, y, z) -> tuple:
-        z, y = y, z
-        persp = 500/(z+300)
-        return x * persp + self.WIDTH/2, y * persp + self.HEIGHT/2
-
     def draw_object(self, obj: Object3d) -> None:
         self.clear()
         for face in obj.faces:
             poly_coords = []
             for pointIndex in face:
-                point = obj.coords[pointIndex]
-                poly_coords.extend(self.project2d(*point))
+                x, y, z = obj.rotated_coords[pointIndex]
+                x, y = obj.project2d(x, y, z)
+                poly_coords.append(x + self.WIDTH/2)
+                poly_coords.append(y + self.HEIGHT/2)
             self.poly(poly_coords)
         for line in obj.lines:
-            p1_2d = self.project2d(*obj.linecoords[line[0]])
-            p2_2d = self.project2d(*obj.linecoords[line[1]])
-            self.line(p1_2d[0], p1_2d[1], p2_2d[0], p2_2d[1])
+            p1x, p1y = obj.project2d(*obj.rotated_linecoords[line[0]])
+            p2x, p2y = obj.project2d(*obj.rotated_linecoords[line[1]])
+            self.line(p1x + self.WIDTH/2, p1y + self.HEIGHT/2, p2x + self.WIDTH/2, p2y + self.HEIGHT/2)

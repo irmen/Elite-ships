@@ -1,4 +1,5 @@
 from math import sin, cos
+from typing import Tuple
 import os
 from vrml.vrml97.parser import buildParser
 from vrml.vrml97.basenodes import IndexedFaceSet, IndexedLineSet
@@ -9,11 +10,10 @@ class Object3d:
         self.name = ""
         self.faces = tuple()
         self.coords = tuple()
+        self.rotated_coords = tuple()
         self.lines = tuple()
         self.linecoords = tuple()
-        self.specularColor = (0.0, 0.0, 0.0)
-        self.diffuseColor = (0.0, 0.0, 0.0)
-        self.shininess = 0.0
+        self.rotated_linecoords = tuple()
 
     def load_from_wrl(self, filename):
         parser = buildParser()
@@ -23,10 +23,10 @@ class Object3d:
             raise IOError("failed to load vrm file")
         self.name = os.path.splitext(os.path.split(filename)[1])[0]
         for shape in scenegraph.children:
-            mat = shape.appearance.material
-            self.shininess = mat.shininess
-            self.diffuseColor = tuple(mat.diffuseColor)
-            self.specularColor = tuple(mat.specularColor)
+            # mat = shape.appearance.material
+            # self.shininess = mat.shininess
+            # self.diffuseColor = tuple(mat.diffuseColor)
+            # self.specularColor = tuple(mat.specularColor)
             geo = shape.geometry
             if isinstance(geo, IndexedFaceSet):
                 faces = []
@@ -41,6 +41,7 @@ class Object3d:
                     faces.append(tuple(face))
                 self.faces = tuple(faces)
                 self.coords = tuple(tuple(xyz) for xyz in geo.coord.point)
+                self.rotated_coords = self.coords
             elif isinstance(geo, IndexedLineSet):
                 lines = []
                 line = []
@@ -54,21 +55,16 @@ class Object3d:
                     lines.append(tuple(line))
                 self.lines = tuple(lines)
                 self.linecoords = tuple(tuple(xyz) for xyz in geo.coord.point)
+                self.rotated_linecoords = self.linecoords
 
-    def rotated(self, t) -> "Object3d":
-        r = Object3d()
-        r.faces = self.faces
-        r.lines = self.lines
-        r.specularColor = self.specularColor
-        r.diffuseColor = self.diffuseColor
-        r.shininess = self.shininess
+    def rotate(self, t: float) -> None:
         matrix = self._make_matrix(t)
-        r.coords = self._rotate(self.coords, matrix)
-        r.linecoords = self._rotate(self.linecoords, matrix)
-        return r
+        self.rotated_coords = self._rotate(self.coords, matrix)
+        self.rotated_linecoords = self._rotate(self.linecoords, matrix)
 
-    def _make_matrix(self, t):
-        # make the rotation matrix
+    Matrix3x3Type = Tuple[Tuple[float, float, float], Tuple[float, float, float], Tuple[float, float, float]]
+
+    def _make_matrix(self, t: float) -> Matrix3x3Type:
         cosa = cos(t)
         sina = sin(t)
         cosb = cos(t*0.33)
@@ -91,22 +87,15 @@ class Object3d:
                 (ayx, ayy, ayz),
                 (azx, azy, azz))
 
-    def _rotate(self, points, matrix) -> tuple:
-        rotated = []
-        for x, y, z in points:
-            rotated.append((
+    def _rotate(self, points: Tuple, matrix: Matrix3x3Type) -> Tuple:
+        return tuple(
+            (
                 x*matrix[0][0] + y*matrix[0][1] + z*matrix[0][2],
                 x*matrix[1][0] + y*matrix[1][1] + z*matrix[1][2],
                 x*matrix[2][0] + y*matrix[2][1] + z*matrix[2][2]
-            ))
-        return tuple(rotated)
+            ) for x, y, z in points
+        )
 
-
-def main():
-    obj = Object3d()
-    obj.load_from_wrl("elite-ships-src/vrml/cobra3.wrl")
-    print("FACES:", obj.faces)
-    print("FACESCOORDS:", obj.coords)
-    print("LINES:", obj.lines)
-    print("LINECOORDS:", obj.linecoords)
-    print("MATERIAL:", obj.shininess, obj.diffuseColor, obj.specularColor)
+    def project2d(self, x: float, y: float, z: float) -> Tuple[float, float]:
+        persp = 500/(z+300)
+        return x * persp, y * persp
