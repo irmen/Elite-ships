@@ -137,6 +137,21 @@ class Object3d:
         persp = 500/(z+300)
         return x * persp, y * persp
 
+    def normal_z(self, face: Tuple) -> float:
+        p1 = self.rotated_coords[face[0]]
+        p2 = self.rotated_coords[face[1]]
+        p3 = self.rotated_coords[face[2]]
+        # So for a triangle p1, p2, p3, if the vector U = p2 - p1 and the vector V = p3 - p1
+        # then the normal N = U * V and can be calculated by:
+        # Nx = UyVz - UzVy
+        # Ny = UzVx - UxVz
+        # Nz = UxVy - UyVx
+        ux = p2[0]-p3[0]
+        uy = p2[1]-p3[1]
+        vx = p1[0]-p3[0]
+        vy = p1[1]-p3[1]
+        return ux*vy - uy*vx
+
     def normalized_normal(self, face: Tuple) -> Tuple[float, float, float]:
         p1 = self.rotated_coords[face[0]]
         p2 = self.rotated_coords[face[1]]

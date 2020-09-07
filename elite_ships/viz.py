@@ -66,22 +66,24 @@ class App(tkinter.Tk):
     def draw_object(self, obj: Object3d) -> None:
         self.clear()
         for faceIndex, face in enumerate(obj.faces):
-            normal = obj.normalized_normal(face)
-            if normal[2] >= 0:
-                continue   # pointing away
+            # Quick, but imprecise, surface normal check for backface culling.
+            # Should really take the view vector into account with full normal vector
+            if obj.normal_z(face) >= 0:
+                continue   # pointing away from us
             points = []
             for pointIndex in face:
                 x, y, z = obj.rotated_coords[pointIndex]
                 x, y = obj.project2d(x, y, z)
                 points.append((x, y))
             self.poly(points)
-            self._draw_normal(face, obj, normal, str(faceIndex))
+            # normal = obj.normalized_normal(face)
+            # self._draw_surface_normal(face, obj, normal, str(faceIndex))
         for line in obj.lines:
             p1x, p1y = obj.project2d(*obj.rotated_linecoords[line[0]])
             p2x, p2y = obj.project2d(*obj.rotated_linecoords[line[1]])
             self.line(p1x, p1y, p2x, p2y)
 
-    def _draw_normal(self, face, obj, normal, text):
+    def _draw_surface_normal(self, face, obj, normal, text):
         sum_x = sum_y = sum_z = 0
         for i in face:
             x, y, z = obj.rotated_coords[i]
