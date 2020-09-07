@@ -1,4 +1,4 @@
-from math import sin, cos
+from math import sin, cos, sqrt
 from typing import Tuple
 import os
 from vrml.vrml97.parser import buildParser
@@ -99,3 +99,20 @@ class Object3d:
     def project2d(self, x: float, y: float, z: float) -> Tuple[float, float]:
         persp = 500/(z+300)
         return x * persp, y * persp
+
+    def normalized_normal(self, face: Tuple) -> Tuple[float, float, float]:
+        p1 = self.rotated_coords[face[0]]
+        p2 = self.rotated_coords[face[1]]
+        p3 = self.rotated_coords[face[2]]
+        # So for a triangle p1, p2, p3, if the vector U = p2 - p1 and the vector V = p3 - p1
+        # then the normal N = U * V and can be calculated by:
+        # Nx = UyVz - UzVy
+        # Ny = UzVx - UxVz
+        # Nz = UxVy - UyVx
+        ux, uy, uz = p2[0]-p3[0], p2[1]-p3[1], p2[2]-p3[2]
+        vx, vy, vz = p1[0]-p3[0], p1[1]-p3[1], p1[2]-p3[2]
+        nx = uy*vz - uz*vy
+        ny = uz*vx - ux*vz
+        nz = ux*vy - uy*vx
+        length = sqrt(nx*nx + ny*ny + nz*nz)
+        return nx/length, ny/length, nz/length
