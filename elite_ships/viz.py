@@ -23,7 +23,7 @@ def viz():
     def animate():
         nonlocal t, active_object
         active_object.rotate(t)
-        app.draw_object(active_object)
+        app.draw_object_using_lines(active_object)
         app.bind("<space>", next_object)
         t += 0.08
         app.after(1000//30, animate)
@@ -63,21 +63,58 @@ class App(tkinter.Tk):
         self.canvas.delete("shipname")
         self.canvas.create_text(self.WIDTH//2, 50, text=name, font=("Courier", 24), tags="shipname")
 
-    def draw_object(self, obj: Object3d) -> None:
+    def draw_object_using_lines(self, obj: Object3d) -> None:
+        self.clear()
+        drawn_edges = set()
+        for faceIndex, face in enumerate(obj.faces):
+            # Quick, but imprecise, surface normal check for backface culling.
+            # Should really take the view vector into account with full normal vector
+            if obj.normal_z(face) >= 0:
+                continue   # pointing away from us
+            # TODO convert face/poly structure to lists of edges.
+            # TODO then only project those points that are used in actually drawn edges.
+            # 3d -> 2d projection.
+            points2d = []
+            for pi in face:
+                x, y, z = obj.rotated_coords[pi]
+                points2d.append(obj.project2d(x, y, z))
+            # draw all edges.
+            pt1, pi1 = points2d[0], face[0]
+            for pt2, pi2 in zip(points2d[1:], face[1:]):
+                edge = (pi1, pi2) if pi1 < pi2 else (pi2, pi1)
+                if edge not in drawn_edges:
+                    drawn_edges.add(edge)
+                    self.line(pt1[0], pt1[1], pt2[0], pt2[1])
+                pt1, pi1 = pt2, pi2
+            # connect back to first point
+            pt2, pi2 = points2d[0], face[0]
+            edge = (pi1, pi2) if pi1 < pi2 else (pi2, pi1)
+            if edge not in drawn_edges:
+                self.line(pt1[0], pt1[1], pt2[0], pt2[1])
+            # normal = obj.normalized_normal(face)
+            # self._draw_surface_normal(face, obj, normal, str(faceIndex))
+        # certain geometry models have separate lines in them (not the .X ones though)
+        for line in obj.lines:
+            p1x, p1y = obj.project2d(*obj.rotated_linecoords[line[0]])
+            p2x, p2y = obj.project2d(*obj.rotated_linecoords[line[1]])
+            self.line(p1x, p1y, p2x, p2y)
+
+    def draw_object_using_poly(self, obj: Object3d) -> None:
         self.clear()
         for faceIndex, face in enumerate(obj.faces):
             # Quick, but imprecise, surface normal check for backface culling.
             # Should really take the view vector into account with full normal vector
             if obj.normal_z(face) >= 0:
                 continue   # pointing away from us
-            points = []
+            # 3d -> 2d projection.
+            points2d = []
             for pi in face:
                 x, y, z = obj.rotated_coords[pi]
-                points.append(obj.project2d(x, y, z))
-            self.poly(points)
-            # TODO: NOTE: when drawing the edges line-by-line, we need to track which ones are already drawn to avoid double lines
+                points2d.append(obj.project2d(x, y, z))
+            self.poly(points2d)
             # normal = obj.normalized_normal(face)
             # self._draw_surface_normal(face, obj, normal, str(faceIndex))
+        # certain geometry models have separate lines in them (not the .X ones though)
         for line in obj.lines:
             p1x, p1y = obj.project2d(*obj.rotated_linecoords[line[0]])
             p2x, p2y = obj.project2d(*obj.rotated_linecoords[line[1]])
