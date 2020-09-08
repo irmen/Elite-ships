@@ -24,6 +24,7 @@ def viz():
         nonlocal t, active_object
         active_object.rotate(t)
         app.draw_object_using_lines(active_object)
+        # app.draw_object_wireframe(active_object)
         app.bind("<space>", next_object)
         t += 0.08
         app.after(1000//30, animate)
@@ -63,6 +64,14 @@ class App(tkinter.Tk):
         self.canvas.delete("shipname")
         self.canvas.create_text(self.WIDTH//2, 50, text=name, font=("Courier", 24), tags="shipname")
 
+    def draw_object_wireframe(self, obj: Object3d) -> None:
+        self.clear()
+        # no hidden surface removal, just draw all edges
+        for p1i, p2i in obj.all_edges:
+            p1_x, p1_y = obj.project2d(*obj.rotated_coords[p1i])
+            p2_x, p2_y = obj.project2d(*obj.rotated_coords[p2i])
+            self.line(p1_x, p1_y, p2_x, p2_y)
+
     def draw_object_using_lines(self, obj: Object3d) -> None:
         self.clear()
         drawn_edges = set()
@@ -71,7 +80,6 @@ class App(tkinter.Tk):
             # Should really take the view vector into account with full normal vector
             if obj.normal_z(face) >= 0:
                 continue   # pointing away from us
-            # TODO convert face/poly structure to lists of edges.
             # TODO then only project those points that are used in actually drawn edges.
             # 3d -> 2d projection.
             points2d = []

@@ -10,7 +10,7 @@ class Object3d:
         self.name = ""
         self.faces_points = tuple()
         self.faces_edges = tuple()
-        self.edges = tuple()
+        self.all_edges = tuple()
         self.coords = tuple()
         self.rotated_coords = tuple()
         self.lines = tuple()
@@ -215,4 +215,6 @@ class Object3d:
             add_edge(p1, p2, face_edges)
             faces.append(face_edges)
         self.faces_edges = tuple(faces)
-        self.edges = tuple(edges)
+        self.all_edges = tuple(edges)
+        if len(set(edges)) != len(edges):
+            raise ValueError("check failed: edges are not unique")
