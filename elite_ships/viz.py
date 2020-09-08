@@ -66,7 +66,7 @@ class App(tkinter.Tk):
     def draw_object_using_lines(self, obj: Object3d) -> None:
         self.clear()
         drawn_edges = set()
-        for faceIndex, face in enumerate(obj.faces):
+        for faceIndex, face in enumerate(obj.faces_points):
             # Quick, but imprecise, surface normal check for backface culling.
             # Should really take the view vector into account with full normal vector
             if obj.normal_z(face) >= 0:
@@ -101,7 +101,7 @@ class App(tkinter.Tk):
 
     def draw_object_using_poly(self, obj: Object3d) -> None:
         self.clear()
-        for faceIndex, face in enumerate(obj.faces):
+        for faceIndex, face in enumerate(obj.faces_points):
             # Quick, but imprecise, surface normal check for backface culling.
             # Should really take the view vector into account with full normal vector
             if obj.normal_z(face) >= 0:

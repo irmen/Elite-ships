@@ -8,7 +8,9 @@ from vrml.vrml97.basenodes import IndexedFaceSet, IndexedLineSet
 class Object3d:
     def __init__(self):
         self.name = ""
-        self.faces = tuple()
+        self.faces_points = tuple()
+        self.faces_edges = tuple()
+        self.edges = tuple()
         self.coords = tuple()
         self.rotated_coords = tuple()
         self.lines = tuple()
@@ -39,7 +41,7 @@ class Object3d:
                         face.append(index)
                 if face:
                     faces.append(tuple(face))
-                self.faces = tuple(faces)
+                self.faces_points = tuple(faces)
                 self.coords = tuple(tuple(xyz) for xyz in geo.coord.point)
                 self.rotated_coords = self.coords
             elif isinstance(geo, IndexedLineSet):
@@ -56,6 +58,7 @@ class Object3d:
                 self.lines = tuple(lines)
                 self.linecoords = tuple(tuple(xyz) for xyz in geo.coord.point)
                 self.rotated_linecoords = self.linecoords
+        self._build_edges()
 
     def load_directXmesh(self, filename):
         lines = iter(open(filename).readlines())
@@ -90,9 +93,10 @@ class Object3d:
                         raise IOError("invalid number of points read")
                     face = tuple(reversed(points))
                     faces.append(face)
-                self.faces = tuple(faces)
+                self.faces_points = tuple(faces)
                 break
         self._remove_duplicate_coords()
+        self._build_edges()
 
     def rotate(self, t: float) -> None:
         matrix = self._make_matrix(t)
@@ -176,7 +180,7 @@ class Object3d:
                 unique_points[point] = len(unique_points)
         new_points = tuple(pt for ix, pt in sorted((index, point) for point, index in unique_points.items()))
         replaced_faces = []
-        for face in self.faces:
+        for face in self.faces_points:
             points = []
             for pi in face:
                 point = self.coords[pi]
@@ -184,4 +188,31 @@ class Object3d:
             replaced_faces.append(tuple(points))
         self.coords = new_points
         self.rotated_coords = self.coords
-        self.faces = tuple(replaced_faces)
+        self.faces_points = tuple(replaced_faces)
+
+    def _build_edges(self):
+        edges = []
+        faces = []
+
+        def add_edge(point1, point2, face):
+            edge = (point1, point2) if point1 < point2 else (point2, point1)
+            try:
+                edge_i = edges.index(edge)
+            except ValueError:
+                face.append(len(edges))
+                edges.append(edge)
+            else:
+                face.append(edge_i)
+
+        for face_pts in self.faces_points:
+            face_edges = []
+            p1 = face_pts[0]
+            for p2 in face_pts[1:]:
+                add_edge(p1, p2, face_edges)
+                p1 = p2
+            # connect back to the first point of the face
+            p2 = face_pts[0]
+            add_edge(p1, p2, face_edges)
+            faces.append(face_edges)
+        self.faces_edges = tuple(faces)
+        self.edges = tuple(edges)
