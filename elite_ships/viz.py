@@ -71,11 +71,11 @@ class App(tkinter.Tk):
             if obj.normal_z(face) >= 0:
                 continue   # pointing away from us
             points = []
-            for pointIndex in face:
-                x, y, z = obj.rotated_coords[pointIndex]
-                x, y = obj.project2d(x, y, z)
-                points.append((x, y))
+            for pi in face:
+                x, y, z = obj.rotated_coords[pi]
+                points.append(obj.project2d(x, y, z))
             self.poly(points)
+            # TODO: NOTE: when drawing the edges line-by-line, we need to track which ones are already drawn to avoid double lines
             # normal = obj.normalized_normal(face)
             # self._draw_surface_normal(face, obj, normal, str(faceIndex))
         for line in obj.lines:
@@ -85,8 +85,8 @@ class App(tkinter.Tk):
 
     def _draw_surface_normal(self, face, obj, normal, text):
         sum_x = sum_y = sum_z = 0
-        for i in face:
-            x, y, z = obj.rotated_coords[i]
+        for pi in face:
+            x, y, z = obj.rotated_coords[pi]
             sum_x += x
             sum_y += y
             sum_z += z

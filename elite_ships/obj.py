@@ -1,5 +1,5 @@
 from math import sin, cos, sqrt
-from typing import Tuple
+from typing import Tuple, Dict
 import os
 from vrml.vrml97.parser import buildParser
 from vrml.vrml97.basenodes import IndexedFaceSet, IndexedLineSet
@@ -58,7 +58,6 @@ class Object3d:
                 self.rotated_linecoords = self.linecoords
 
     def load_directXmesh(self, filename):
-        # TODO the mesh coordinates need to be de-duped!
         lines = iter(open(filename).readlines())
         while True:
             line = next(lines).strip()
@@ -73,12 +72,11 @@ class Object3d:
                     point = tuple(float(x) * scaling for x in point)
                     coords.append(point)
                 self.coords = tuple(coords)
-                if scaling!=1:
+                if scaling != 1:
                     print("----- SCALED COORDS OF ", self.name)
                     for point in self.coords:
                         print(f" {point[0]}; {point[1]}; {point[2]};,")
                     print("----- END SCALED\n")
-
                 self.rotated_coords = self.coords
                 next(lines)
                 line = next(lines).strip().strip(";")
@@ -87,12 +85,14 @@ class Object3d:
                 for i in range(num_faces):
                     line = next(lines).split(";")
                     num_points = int(line[0])
-                    points = tuple(int(x) for x in line[1].split(','))
+                    points = [int(x) for x in line[1].split(',')]
                     if len(points) != num_points:
                         raise IOError("invalid number of points read")
-                    faces.append(tuple(reversed(points)))
+                    face = tuple(reversed(points))
+                    faces.append(face)
                 self.faces = tuple(faces)
                 break
+        self._remove_duplicate_coords()
 
     def rotate(self, t: float) -> None:
         matrix = self._make_matrix(t)
@@ -168,3 +168,20 @@ class Object3d:
         nz = ux*vy - uy*vx
         length = sqrt(nx*nx + ny*ny + nz*nz)
         return nx/length, ny/length, nz/length
+
+    def _remove_duplicate_coords(self):
+        unique_points = {}
+        for index, point in enumerate(self.coords):
+            if point not in unique_points:
+                unique_points[point] = len(unique_points)
+        new_points = tuple(pt for ix, pt in sorted((index, point) for point, index in unique_points.items()))
+        replaced_faces = []
+        for face in self.faces:
+            points = []
+            for pi in face:
+                point = self.coords[pi]
+                points.append(unique_points[point])
+            replaced_faces.append(tuple(points))
+        self.coords = new_points
+        self.rotated_coords = self.coords
+        self.faces = tuple(replaced_faces)
