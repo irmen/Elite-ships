@@ -43,16 +43,16 @@ class App(tkinter.Tk):
         self.canvas = tkinter.Canvas(self, width=self.WIDTH, height=self.HEIGHT)
         self.canvas.pack()
 
-    def line(self, x1, y1, x2, y2):
+    def line(self, x1, y1, x2, y2, color="navy", width=2):
         self.canvas.create_line((x1+self.WIDTH/2, y1+self.HEIGHT/2),
                                 (x2+self.WIDTH/2, y2+self.HEIGHT/2),
-                                tags="line", fill="navy", width=2)
+                                tags="line", fill=color, width=width)
 
-    def poly(self, points):
+    def poly(self, points, color="black"):
         coords = []
         for x, y in points:
             coords.extend((x+self.WIDTH/2, y+self.HEIGHT/2))
-        self.canvas.create_polygon(coords, tags="line", fill="", outline="black", width=2)
+        self.canvas.create_polygon(coords, tags="line", fill="", outline=color, width=2)
 
     def text(self, x, y, text):
         self.canvas.create_text(x+self.WIDTH/2, y+self.HEIGHT/2, text=text, tags="line")
@@ -74,33 +74,25 @@ class App(tkinter.Tk):
 
     def draw_object_using_lines(self, obj: Object3d) -> None:
         self.clear()
-        drawn_edges = set()
-        for faceIndex, face in enumerate(obj.faces_points):
+        num_lines = 0
+        edge_drawn = [False] * len(obj.all_edges)
+        for face_index in range(len(obj.faces_points)):
+            face_points = obj.faces_points[face_index]
             # Quick, but imprecise, surface normal check for backface culling.
             # Should really take the view vector into account with full normal vector
-            if obj.normal_z(face) >= 0:
+            if obj.normal_z(face_points) >= 0:
                 continue   # pointing away from us
-            # TODO then only project those points that are used in actually drawn edges.
-            # 3d -> 2d projection.
-            points2d = []
-            for pi in face:
-                x, y, z = obj.rotated_coords[pi]
-                points2d.append(obj.project2d(x, y, z))
-            # draw all edges.
-            pt1, pi1 = points2d[0], face[0]
-            for pt2, pi2 in zip(points2d[1:], face[1:]):
-                edge = (pi1, pi2) if pi1 < pi2 else (pi2, pi1)
-                if edge not in drawn_edges:
-                    drawn_edges.add(edge)
-                    self.line(pt1[0], pt1[1], pt2[0], pt2[1])
-                pt1, pi1 = pt2, pi2
-            # connect back to first point
-            pt2, pi2 = points2d[0], face[0]
-            edge = (pi1, pi2) if pi1 < pi2 else (pi2, pi1)
-            if edge not in drawn_edges:
-                self.line(pt1[0], pt1[1], pt2[0], pt2[1])
-            # normal = obj.normalized_normal(face)
-            # self._draw_surface_normal(face, obj, normal, str(faceIndex))
+            for edge in obj.faces_edges[face_index]:
+                if not edge_drawn[edge]:
+                    pix1, pix2 = obj.all_edges[edge]
+                    p1x, p1y = obj.project2d(*obj.rotated_coords[pix1])
+                    p2x, p2y = obj.project2d(*obj.rotated_coords[pix2])
+                    self.line(p1x, p1y, p2x, p2y)
+                    num_lines += 1
+                    edge_drawn[edge] = True
+            normal = obj.normalized_normal(face_points)
+            self._draw_surface_normal(face_points, obj, normal, str(face_index))
+
         # certain geometry models have separate lines in them (not the .X ones though)
         for line in obj.lines:
             p1x, p1y = obj.project2d(*obj.rotated_linecoords[line[0]])
@@ -143,6 +135,6 @@ class App(tkinter.Tk):
         nz2 = nz1 + normal[2] * 30
         x1, y1 = obj.project2d(nx1, ny1, nz1)
         x2, y2 = obj.project2d(nx2, ny2, nz2)
-        self.line(x1, y1, x2, y2)
+        self.line(x1, y1, x2, y2, "maroon", 1)
         self.text(x2, y2, text)
 

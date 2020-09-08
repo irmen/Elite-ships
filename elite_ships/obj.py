@@ -141,10 +141,10 @@ class Object3d:
         persp = 500/(z+300)
         return x * persp, y * persp
 
-    def normal_z(self, face: Tuple) -> float:
-        p1 = self.rotated_coords[face[0]]
-        p2 = self.rotated_coords[face[1]]
-        p3 = self.rotated_coords[face[2]]
+    def normal_z(self, points: Tuple) -> float:
+        p1 = self.rotated_coords[points[0]]
+        p2 = self.rotated_coords[points[1]]
+        p3 = self.rotated_coords[points[2]]
         # So for a triangle p1, p2, p3, if the vector U = p2 - p1 and the vector V = p3 - p1
         # then the normal N = U * V and can be calculated by:
         # Nx = UyVz - UzVy
@@ -156,10 +156,10 @@ class Object3d:
         vy = p1[1]-p3[1]
         return ux*vy - uy*vx
 
-    def normalized_normal(self, face: Tuple) -> Tuple[float, float, float]:
-        p1 = self.rotated_coords[face[0]]
-        p2 = self.rotated_coords[face[1]]
-        p3 = self.rotated_coords[face[2]]
+    def normalized_normal(self, points: Tuple) -> Tuple[float, float, float]:
+        p1 = self.rotated_coords[points[0]]
+        p2 = self.rotated_coords[points[1]]
+        p3 = self.rotated_coords[points[2]]
         # So for a triangle p1, p2, p3, if the vector U = p2 - p1 and the vector V = p3 - p1
         # then the normal N = U * V and can be calculated by:
         # Nx = UyVz - UzVy
@@ -218,3 +218,5 @@ class Object3d:
         self.all_edges = tuple(edges)
         if len(set(edges)) != len(edges):
             raise ValueError("check failed: edges are not unique")
+        if len(self.faces_edges) != len(self.faces_points):
+            raise ValueError("check failed: faces count mismatch")
