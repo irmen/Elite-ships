@@ -1,9 +1,13 @@
 import tkinter
+import os
 from glob import glob
 from .obj import Object3d
 
 
-def viz():
+ship_models_path = os.path.join(os.path.dirname(__file__), "models")
+
+
+def main():
 
     active_object = Object3d()
     app = App()
@@ -15,17 +19,19 @@ def viz():
         active_object.load_directXmesh(next(objects))
         app.shipname(active_object.name)
 
-    # objects = iter(glob("elite-ships-src/vrml/*.wrl"))
-    objects = iter(glob("elite-ships-src/Geosbbc/*.X"))
+    # objects = iter(glob(os.path.join(ship_models_path, "vrml", "*.wrl")))
+    objects = iter(glob(os.path.join(ship_models_path, "bbc", "*.X")))
     next_object(None)
     t = 0.0
 
     def animate():
         nonlocal t, active_object
         active_object.rotate(t)
+        # app.draw_object_using_poly(active_object)
         app.draw_object_using_lines(active_object)
         # app.draw_object_wireframe(active_object)
         app.bind("<space>", next_object)
+        app.bind("<Button-1>", next_object)
         t += 0.08
         app.after(1000//30, animate)
 
@@ -40,6 +46,7 @@ class App(tkinter.Tk):
 
     def __init__(self):
         super().__init__()
+        self.wm_title("Elite ship models from http://www.elitehomepage.org/archive/index.htm >>>>>> press SPACE or click for next ship! <<<<<<")
         self.canvas = tkinter.Canvas(self, width=self.WIDTH, height=self.HEIGHT)
         self.canvas.pack()
 

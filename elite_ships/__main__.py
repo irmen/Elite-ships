@@ -1,2 +1,2 @@
-from .viz import viz
-viz()
+from .viz import main
+main()
