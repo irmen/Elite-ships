@@ -19,8 +19,8 @@ def main():
         active_object.load_directXmesh(next(objects))
         app.shipname(active_object.name)
 
-    # objects = iter(glob(os.path.join(ship_models_path, "vrml", "*.wrl")))
-    objects = iter(glob(os.path.join(ship_models_path, "bbc", "*.X")))
+    # objects = iter(sorted(glob(os.path.join(ship_models_path, "vrml", "*.wrl"))))
+    objects = iter(sorted(glob(os.path.join(ship_models_path, "bbc", "*.X"))))
     next_object(None)
     t = 0.0
 
