@@ -1,5 +1,5 @@
 from math import sin, cos, sqrt
-from typing import Tuple, Dict
+from typing import Tuple
 import os
 from vrml.vrml97.parser import buildParser
 from vrml.vrml97.basenodes import IndexedFaceSet, IndexedLineSet

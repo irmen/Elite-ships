@@ -47,7 +47,7 @@ class App(tkinter.Tk):
     def __init__(self):
         super().__init__()
         self.wm_title("Elite ship models from http://www.elitehomepage.org/archive/index.htm >>>>>> press SPACE or click for next ship! <<<<<<")
-        self.canvas = tkinter.Canvas(self, width=self.WIDTH, height=self.HEIGHT)
+        self.canvas = tkinter.Canvas(self, width=self.WIDTH, height=self.HEIGHT, bg="lightgray")
         self.canvas.pack()
 
     def line(self, x1, y1, x2, y2, color="navy", width=2):
