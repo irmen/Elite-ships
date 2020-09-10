@@ -18,6 +18,7 @@ def main():
         # active_object.load_from_wrl(next(objects))
         active_object.load_directXmesh(next(objects))
         app.shipname(active_object.name)
+        dump_object(active_object)
 
     # objects = iter(sorted(glob(os.path.join(ship_models_path, "vrml", "*.wrl"))))
     objects = iter(sorted(glob(os.path.join(ship_models_path, "bbc", "*.X"))))
@@ -145,3 +146,31 @@ class App(tkinter.Tk):
         self.line(x1, y1, x2, y2, "maroon", 1)
         self.text(x2, y2, text)
 
+
+def dump_object(obj: Object3d):
+    print("\n-----DUMP OBJECT ", obj.name)
+    x = []
+    y = []
+    z = []
+    SCALE = 1.0
+    for px, py, pz in obj.coords:
+        x.append(int(px * SCALE))
+        y.append(int(py * SCALE))
+        z.append(int(pz * SCALE))
+
+    print("word[] xcoor = [", ",".join(str(v) for v in x), "]")
+    print("word[] ycoor = [", ",".join(str(v) for v in y), "]")
+    print("word[] zcoor = [", ",".join(str(v) for v in z), "]")
+
+    print()
+
+    edgesFrom = []
+    edgesTo = []
+    for p1, p2 in obj.all_edges:
+        edgesFrom.append(p1)
+        edgesTo.append(p2)
+
+    print("ubyte[] edgesFrom = [", ",".join(str(v) for v in edgesFrom), "]")
+    print("ubyte[] edgesTp = [", ",".join(str(v) for v in edgesTo), "]")
+
+    print("-------- DUMP COMPLETE\n\n")
