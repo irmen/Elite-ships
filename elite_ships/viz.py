@@ -149,6 +149,11 @@ class App(tkinter.Tk):
 
 def dump_object(obj: Object3d):
     print("\n-----DUMP OBJECT ", obj.name)
+    print("const ubyte totalNumberOfEdges =", len(obj.all_edges))
+    print("const ubyte totalNumberOfFaces =", len(obj.faces_edges))
+    print("const ubyte totalNumberOfPoints =", len(obj.coords))
+    print("str shipName = \""+obj.name+"\"")
+
     x = []
     y = []
     z = []
@@ -158,11 +163,10 @@ def dump_object(obj: Object3d):
         y.append(int(py * SCALE))
         z.append(int(pz * SCALE))
 
+    print("; vertices")
     print("word[] xcoor = [", ",".join(str(v) for v in x), "]")
     print("word[] ycoor = [", ",".join(str(v) for v in y), "]")
     print("word[] zcoor = [", ",".join(str(v) for v in z), "]")
-
-    print()
 
     edgesFrom = []
     edgesTo = []
@@ -170,7 +174,18 @@ def dump_object(obj: Object3d):
         edgesFrom.append(p1)
         edgesTo.append(p2)
 
+    print("; edges and faces")
     print("ubyte[] edgesFrom = [", ",".join(str(v) for v in edgesFrom), "]")
-    print("ubyte[] edgesTp = [", ",".join(str(v) for v in edgesTo), "]")
+    print("ubyte[] edgesTo = [", ",".join(str(v) for v in edgesTo), "]")
+    print("ubyte[] facesPoints = [")
+    for pt in obj.faces_points:
+        print("    ", ",".join(str(i) for i in pt), end="")
+        print(" ,255,")
+    print("]")
+    print("ubyte[] facesEdges = [")
+    for edge in obj.faces_edges:
+        print("    ", ",".join(str(i) for i in edge), end="")
+        print(" ,255,")
+    print("]")
 
     print("-------- DUMP COMPLETE\n\n")
