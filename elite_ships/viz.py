@@ -11,17 +11,27 @@ def main():
 
     active_object = Object3d()
     app = App()
+    source = "bbc"     # or "vrml"
 
     def next_object(e):
         nonlocal active_object
         active_object = Object3d()
-        # active_object.load_from_wrl(next(objects))
-        active_object.load_directXmesh(next(objects))
+        if source == "vrml":
+            active_object.load_from_wrl(next(objects))
+        elif source == "bbc":
+            active_object.load_directXmesh(next(objects))
+        else:
+            raise ValueError("invalid source")
         app.shipname(active_object.name)
         dump_object(active_object)
 
-    # objects = iter(sorted(glob(os.path.join(ship_models_path, "vrml", "*.wrl"))))
-    objects = iter(sorted(glob(os.path.join(ship_models_path, "bbc", "*.X"))))
+    if source == "vrml":
+        objects = iter(sorted(glob(os.path.join(ship_models_path, "vrml", "*.wrl"))))
+    elif source == "bbc":
+        objects = iter(sorted(glob(os.path.join(ship_models_path, "bbc", "*.X"))))
+    else:
+        raise ValueError("invalid source")
+
     next_object(None)
     t = 0.0
 

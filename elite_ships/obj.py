@@ -1,8 +1,7 @@
 from math import sin, cos, sqrt
 from typing import Tuple
 import os
-from vrml.vrml97.parser import buildParser
-from vrml.vrml97.basenodes import IndexedFaceSet, IndexedLineSet
+from .simplevrml import parse_vrml_file
 
 
 class Object3d:
@@ -18,8 +17,7 @@ class Object3d:
         self.rotated_linecoords = tuple()
 
     def load_from_wrl(self, filename):
-        parser = buildParser()
-        result = parser.parse(open(filename).read())
+        result = parse_vrml_file(filename)
         scenegraph = result[1][1]
         if len(scenegraph.children) < 1:
             raise IOError("failed to load vrm file")
