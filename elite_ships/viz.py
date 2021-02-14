@@ -11,7 +11,8 @@ def main():
 
     active_object = Object3d()
     app = App()
-    source = "bbc"     # or "vrml"
+    source = "bbc"
+    #  source = "vrml"      # vrml has vertex ordering issues that cause invalid hidden face removals...
 
     def next_object(e):
         nonlocal active_object

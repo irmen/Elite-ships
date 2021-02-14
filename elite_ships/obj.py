@@ -1,7 +1,7 @@
 from math import sin, cos, sqrt
 from typing import Tuple
 import os
-from .simplevrml import parse_vrml_file
+from .simplevrml import parse_vrml_file, IndexedFaceSet, IndexedLineSet
 
 
 class Object3d:
@@ -17,21 +17,19 @@ class Object3d:
         self.rotated_linecoords = tuple()
 
     def load_from_wrl(self, filename):
-        result = parse_vrml_file(filename)
-        scenegraph = result[1][1]
-        if len(scenegraph.children) < 1:
+        scene = parse_vrml_file(filename)
+        if len(scene) < 1:
             raise IOError("failed to load vrm file")
         self.name = os.path.splitext(os.path.split(filename)[1])[0]
-        for shape in scenegraph.children:
+        for shape in scene:
             # mat = shape.appearance.material
             # self.shininess = mat.shininess
             # self.diffuseColor = tuple(mat.diffuseColor)
             # self.specularColor = tuple(mat.specularColor)
-            geo = shape.geometry
-            if isinstance(geo, IndexedFaceSet):
+            if isinstance(shape.geo, IndexedFaceSet):
                 faces = []
                 face = []
-                for index in geo.coordIndex:
+                for index in shape.geo.faceindexes:
                     if index == -1:
                         faces.append(tuple(face))
                         face.clear()
@@ -40,12 +38,12 @@ class Object3d:
                 if face:
                     faces.append(tuple(face))
                 self.faces_points = tuple(faces)
-                self.coords = tuple(tuple(xyz) for xyz in geo.coord.point)
+                self.coords = tuple(shape.geo.vertices.coordinates)
                 self.rotated_coords = self.coords
-            elif isinstance(geo, IndexedLineSet):
+            elif isinstance(shape.geo, IndexedLineSet):
                 lines = []
                 line = []
-                for index in geo.coordIndex:
+                for index in shape.geo.lineindexes:
                     if index == -1:
                         lines.append(tuple(line))
                         line.clear()
@@ -54,7 +52,7 @@ class Object3d:
                 if line:
                     lines.append(tuple(line))
                 self.lines = tuple(lines)
-                self.linecoords = tuple(tuple(xyz) for xyz in geo.coord.point)
+                self.linecoords = tuple(shape.geo.vertices.coordinates)
                 self.rotated_linecoords = self.linecoords
         self._build_edges()
 

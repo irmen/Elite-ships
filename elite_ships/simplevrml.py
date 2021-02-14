@@ -81,19 +81,26 @@ class Shape:
 
 class IndexedFaceSet:
     def __init__(self, faceindexes, vertices):
-        self.faceindexes = faceindexes
+        self.faceindexes = (int(x) for x in faceindexes)
         self.vertices = vertices
 
 
 class IndexedLineSet:
     def __init__(self, lineindexes, vertices):
-        self.lineindexes = lineindexes
+        self.lineindexes = (int(x) for x in lineindexes)
         self.vertices = vertices
 
 
 class Vertices:
     def __init__(self, coordinates):
-        self.coordinates = coordinates
+        # coordinates is a flat list, split it in tuples of (x,y,z) coordinates
+        self.coordinates = []
+        ci = iter(coordinates)
+        while True:
+            try:
+                self.coordinates.append((int(next(ci)), int(next(ci)), int(next(ci))))
+            except StopIteration:
+                break
 
 
 class VrmlParser:
